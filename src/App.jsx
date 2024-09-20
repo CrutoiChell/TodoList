@@ -6,7 +6,7 @@ export default function App() {
   const [list, setList] = useState('');
   const [arr, setArr] = useState(['']);
 
-  // localStorage.clear()
+  localStorage.clear()
 
   useEffect(() => {
     let copy2
