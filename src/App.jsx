@@ -1,52 +1,82 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-
+import Task from './components/Tasks/Task';
 export default function App() {
 
   const [list, setList] = useState('');
   const [arr, setArr] = useState(['']);
-
+  const [editIndex, setEditInput] = useState(null);
   // localStorage.clear()
 
   useEffect(() => {
-    let copy2
-    if (localStorage.length > 0) {
-      let key = localStorage.key('arr');
-      let val = localStorage.getItem(key);
-      copy2 = val.split(',')
+    const val = localStorage.getItem('arr');
+    if (val) {
+      setArr(JSON.parse(val));
     }
-
-    setArr(() => [...copy2]);
   }, []);
+    
+  function handleAddList() {
+    if (list.trim()) {
+      let copy = [...arr];
 
-  function Addlist() {
-    if (list) {
-      let copy = [...arr,list]
-      setArr(copy)
-      localStorage.setItem('arr', copy)
-      setList([''])
+      if (editIndex !== null) {
+        copy[editIndex] = list; 
+        setEditInput(''); 
+      } else {
+        copy.push(list); 
+      }
+
+      setArr(copy);
+      localStorage.setItem('arr', JSON.stringify(copy)); 
+      setList(''); 
     }
   }
 
-  function DelLi(index) {
+  function handleEditList(index) {
+    setList(arr[index]);
+    setEditInput(index);
+  }
+
+
+  function handleListDelite(index) {
     let copy = [...arr]
     copy.splice(index, 1)
-    localStorage.setItem('arr', copy)
+    localStorage.setItem('arr', JSON.stringify(copy))
     setArr(copy)
   }
 
-  let result = arr.map((item, index) => {
+  let result
+  if (arr.length > 0) {
+    result = arr.map((item, index) => {
 
-    return <li onClick={() => DelLi(index)} key={index}>{item}</li>
-  })
+      return (
+        <li key={index}>
+          {item}
+          {item.trim() && <button onClick={() => handleListDelite(index)}>Delete</button>}
+        </li>
+      )
+    })
+  }
+
   return (
     <>
       <main className='main'>
-        <input onChange={e => setList(e.target.value)} value={list} type="text" /> <br />
-        <button onClick={Addlist}>add</button>
+        <input
+          onChange={e => setList(e.target.value)}
+          value={list}
+          type="text"
+        />
+        <br />
+        <button onClick={handleAddList}>{editIndex !== null ? 'Update' : 'Add'}</button>
         <div className='Bottom'>
           <ul>
-            {result}
+            {arr.length > 0 && arr.map((item, index) => (
+              <li key={index}>
+                {item}
+                <button onClick={() => handleListDelite(index)}>Delete</button>
+                <button onClick={() => handleEditList(index)}>Edit</button>
+              </li>
+            ))}
           </ul>
         </div>
       </main>
